@@ -229,17 +229,32 @@
 
             if (!selectedEligibility) return;
 
-            if (selectedEligibility === "eligible") {
+if (selectedEligibility === "eligible") {
 
-                result.className = "message eligible";
+    result.className = "message eligible";
 
-                result.textContent =
-                    "Your confirmation indicates that you meet " +
-                    "the stated age requirement. You may proceed " +
-                    "to the approved consent procedure.";
+    result.innerHTML = `
+        <strong>Eligibility confirmed.</strong>
+        <p>
+            Your confirmation indicates that you meet
+            the stated age requirement.
+        </p>
+        <a href="consent-draft.html"
+           style="
+               display:inline-block;
+               background:#244b35;
+               color:white;
+               padding:12px 20px;
+               border-radius:5px;
+               text-decoration:none;
+               font-weight:bold;
+               margin-top:10px;
+           ">
+            Continue to Consent
+        </a>
+    `;
 
-            } else {
-
+} else {
                 result.className = "message ineligible";
 
                 result.textContent =
