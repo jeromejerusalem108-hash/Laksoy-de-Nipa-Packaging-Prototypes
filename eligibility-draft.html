@@ -1,0 +1,254 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PROJECT L.A.K.A.S. | Eligibility</title>
+
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: Arial, Helvetica, sans-serif;
+            background: #f5f3eb;
+            color: #263b2d;
+            line-height: 1.7;
+        }
+
+        header {
+            background: #173d2b;
+            color: #fffdf5;
+            text-align: center;
+            padding: 35px 20px;
+        }
+
+        header h1 {
+            font-family: Georgia, serif;
+            letter-spacing: 2px;
+        }
+
+        main {
+            width: min(650px, 90%);
+            margin: 50px auto;
+        }
+
+        h2 {
+            font-family: Georgia, serif;
+            color: #244b35;
+            margin-bottom: 12px;
+        }
+
+        p {
+            margin-bottom: 18px;
+        }
+
+        .eligibility-card {
+            background: white;
+            padding: 25px;
+            border-radius: 8px;
+            box-shadow: 0 3px 12px rgba(0,0,0,0.07);
+            margin: 25px 0;
+        }
+
+        .choice {
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+            padding: 15px;
+            margin-top: 12px;
+            border: 1px solid #d5d5ca;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        .choice input {
+            margin-top: 6px;
+            accent-color: #244b35;
+        }
+
+        .choice:hover {
+            background: #f5f3eb;
+        }
+
+        button {
+            width: 100%;
+            padding: 14px;
+            border: none;
+            border-radius: 5px;
+            background: #244b35;
+            color: white;
+            font-size: 1rem;
+            font-weight: bold;
+            cursor: pointer;
+            margin-top: 18px;
+        }
+
+        button:hover {
+            background: #356347;
+        }
+
+        button:disabled {
+            background: #999;
+            cursor: not-allowed;
+        }
+
+        .message {
+            display: none;
+            padding: 18px;
+            border-radius: 5px;
+            margin-top: 22px;
+        }
+
+        .eligible {
+            display: block;
+            background: #e4eee5;
+            border-left: 4px solid #356347;
+        }
+
+        .ineligible {
+            display: block;
+            background: #f5e8e5;
+            border-left: 4px solid #a34b3e;
+        }
+
+        .navigation {
+            margin-top: 25px;
+        }
+
+        .navigation a {
+            color: #244b35;
+            text-decoration: none;
+        }
+
+        footer {
+            background: #173d2b;
+            color: #e9e8dc;
+            text-align: center;
+            padding: 22px;
+            font-size: 0.9rem;
+        }
+    </style>
+</head>
+
+<body>
+
+    <header>
+        <h1>PROJECT L.A.K.A.S.</h1>
+        <p>Participant Eligibility</p>
+    </header>
+
+    <main>
+
+        <h2>Age Eligibility Confirmation</h2>
+
+        <p>
+            Before proceeding, please confirm whether you meet
+            the minimum age requirement for this research.
+        </p>
+
+        <div class="eligibility-card">
+
+            <h2>Are you at least 21 years old?</h2>
+
+            <p>
+                Only individuals aged 21 and above are eligible
+                to participate in this evaluation.
+            </p>
+
+            <label class="choice">
+                <input
+                    type="radio"
+                    name="ageEligibility"
+                    value="eligible"
+                >
+                <span>
+                    Yes, I am 21 years old or older.
+                </span>
+            </label>
+
+            <label class="choice">
+                <input
+                    type="radio"
+                    name="ageEligibility"
+                    value="ineligible"
+                >
+                <span>
+                    No, I am below 21 years old.
+                </span>
+            </label>
+
+            <button id="confirmButton" disabled>
+                Confirm Eligibility
+            </button>
+
+            <div id="result" class="message" aria-live="polite"></div>
+
+        </div>
+
+        <div class="navigation">
+            <a href="participant-info-draft.html">
+                ← Back to Participant Information
+            </a>
+        </div>
+
+    </main>
+
+    <footer>
+        PROJECT L.A.K.A.S. Research Team
+    </footer>
+
+    <script>
+        const choices = document.querySelectorAll(
+            'input[name="ageEligibility"]'
+        );
+
+        const confirmButton =
+            document.getElementById("confirmButton");
+
+        const result =
+            document.getElementById("result");
+
+        let selectedEligibility = "";
+
+        choices.forEach(choice => {
+            choice.addEventListener("change", function () {
+                selectedEligibility = this.value;
+                confirmButton.disabled = false;
+
+                result.className = "message";
+                result.textContent = "";
+            });
+        });
+
+        confirmButton.addEventListener("click", function () {
+
+            if (!selectedEligibility) return;
+
+            if (selectedEligibility === "eligible") {
+
+                result.className = "message eligible";
+
+                result.textContent =
+                    "Your confirmation indicates that you meet " +
+                    "the stated age requirement. You may proceed " +
+                    "to the approved consent procedure.";
+
+            } else {
+
+                result.className = "message ineligible";
+
+                result.textContent =
+                    "You are not eligible to participate in this " +
+                    "research. Please do not proceed to the consent " +
+                    "or evaluation pages.";
+            }
+        });
+    </script>
+
+</body>
+</html>
