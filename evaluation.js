@@ -301,8 +301,3 @@ function renderF1Questionnaire(sketchCode, position) {
         saveCurrentF1Answers(sketchCode, position);
     };
 }
-
-
-        questions.appendChild(section);
-    });
-}
