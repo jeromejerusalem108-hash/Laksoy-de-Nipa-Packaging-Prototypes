@@ -126,11 +126,16 @@
             border: 1px solid #244b35;
         }
 
-        .next {
-            background: #999;
-            color: white;
-            cursor: not-allowed;
-        }
+.next {
+    background: #244b35;
+    color: white;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+
+.next:hover {
+    background: #356347;
+}
 
         footer {
             background: #173d2b;
@@ -283,16 +288,15 @@
             for actual participants.
         </div>
 
-        <div class="navigation">
-            <a class="back" href="eligibility-draft.html">
-                Back to Eligibility
-            </a>
+<div class="navigation">
+    <a class="back" href="eligibility-draft.html">
+        Back to Eligibility
+    </a>
 
-            <a class="next" href="#" aria-disabled="true"
-                onclick="return false;">
-                Continue to Evaluation — Not Available
-            </a>
-        </div>
+    <a class="next" href="f1-instructions-draft.html">
+        Continue to F1 Evaluation Instructions →
+    </a>
+</div>
 
     </main>
 
