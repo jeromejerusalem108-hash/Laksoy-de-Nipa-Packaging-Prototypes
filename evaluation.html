@@ -1,0 +1,342 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>PROJECT L.A.K.A.S. | Evaluation</title>
+
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            overflow: hidden;
+            background: #f5f3ed;
+        }
+
+        /* Main header */
+        .topbar {
+            height: 54px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 16px;
+            background: #183b2b;
+            color: white;
+        }
+
+        .topbar strong {
+            font-size: 15px;
+        }
+
+        .topbar select {
+            padding: 7px;
+            border-radius: 5px;
+            max-width: 190px;
+        }
+
+        /* Main workspace */
+        .workspace {
+            display: flex;
+            height: calc(100vh - 54px);
+            position: relative;
+        }
+
+        /* Evaluation panel */
+        .evaluation-panel {
+            width: 36%;
+            min-width: 300px;
+            max-width: 65%;
+            padding: 22px;
+            background: white;
+            overflow-y: auto;
+        }
+
+        .evaluation-panel h2 {
+            margin-top: 0;
+            color: #183b2b;
+        }
+
+        /* Resizable divider */
+        .divider {
+            width: 12px;
+            background: #e4e1d8;
+            cursor: col-resize;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 5;
+        }
+
+        .divider button {
+            border: none;
+            background: #183b2b;
+            color: white;
+            border-radius: 20px;
+            width: 27px;
+            height: 42px;
+            cursor: pointer;
+            font-size: 17px;
+        }
+
+        /* 3D model viewer */
+        .model-viewer {
+            flex: 1;
+            min-width: 0;
+            background: #eaeaea;
+        }
+
+        .model-viewer iframe {
+            width: 100%;
+            height: 100%;
+            border: none;
+            display: block;
+        }
+
+        /* Collapsed desktop panel */
+        .workspace.collapsed .evaluation-panel {
+            display: none;
+        }
+
+        .workspace.collapsed .divider {
+            width: 34px;
+        }
+
+        /* Mobile drawer button */
+        .drawer-toggle {
+            display: none;
+        }
+
+        @media (max-width: 760px) {
+
+            .topbar {
+                height: 50px;
+                padding: 0 10px;
+            }
+
+            .topbar strong {
+                font-size: 13px;
+            }
+
+            .topbar select {
+                max-width: 145px;
+            }
+
+            .workspace {
+                height: calc(100dvh - 50px);
+            }
+
+            /* Model fills mobile screen */
+            .model-viewer {
+                width: 100%;
+                height: 100%;
+            }
+
+            /* Right-side evaluation drawer */
+            .evaluation-panel {
+                position: fixed;
+                top: 50px;
+                right: 0;
+                bottom: 0;
+                width: 88%;
+                max-width: 420px;
+                min-width: 0;
+                z-index: 20;
+                transform: translateX(100%);
+                transition: transform 0.3s ease;
+                box-shadow: -5px 0 18px rgba(0,0,0,0.2);
+            }
+
+            .evaluation-panel.open {
+                transform: translateX(0);
+            }
+
+            .divider {
+                display: none;
+            }
+
+            .drawer-toggle {
+                display: block;
+                position: fixed;
+                right: 0;
+                top: 50%;
+                transform: translateY(-50%);
+                z-index: 25;
+                border: none;
+                border-radius: 10px 0 0 10px;
+                background: #183b2b;
+                color: white;
+                padding: 17px 10px;
+                writing-mode: vertical-rl;
+                cursor: pointer;
+            }
+
+            .drawer-toggle.hidden {
+                display: none;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <header class="topbar">
+        <strong>PROJECT L.A.K.A.S.</strong>
+
+        <select id="designPicker" aria-label="Choose presentation">
+        </select>
+    </header>
+
+    <main class="workspace" id="workspace">
+
+        <section class="evaluation-panel" id="evaluationPanel">
+            <h2>F1 Evaluation</h2>
+
+            <p>
+                This panel will contain the evaluation
+                questionnaire for the displayed design.
+            </p>
+
+            <p>
+                Your answers will remain available when
+                you switch between the panel and model.
+            </p>
+
+            <hr>
+
+            <p><strong>Current development stage:</strong></p>
+            <p>Interface setup and model display testing.</p>
+
+        </section>
+
+        <div class="divider" id="divider">
+            <button id="collapseButton" aria-label="Collapse evaluation panel">
+                &lt;
+            </button>
+        </div>
+
+        <section class="model-viewer">
+            <iframe
+                id="modelFrame"
+                title="Laksoy 3D presentation">
+            </iframe>
+        </section>
+
+    </main>
+
+    <button
+        class="drawer-toggle"
+        id="drawerButton"
+        aria-label="Open evaluation form">
+        Evaluate →
+    </button>
+
+    <script src="config.js"></script>
+
+    <script>
+        const workspace = document.getElementById("workspace");
+        const panel = document.getElementById("evaluationPanel");
+        const divider = document.getElementById("divider");
+        const collapseButton = document.getElementById("collapseButton");
+        const drawerButton = document.getElementById("drawerButton");
+        const modelFrame = document.getElementById("modelFrame");
+        const designPicker = document.getElementById("designPicker");
+
+        // Load the presentation choices from config.js
+        const order = EVALUATION_CONFIG.sketchOrder;
+
+        order.forEach(code => {
+            const option = document.createElement("option");
+            option.value = code;
+            option.textContent =
+                code + " - " + EVALUATION_CONFIG.materials[code].name;
+
+            designPicker.appendChild(option);
+        });
+
+        // Load the selected 3D model
+        function loadModel(code) {
+            const material = EVALUATION_CONFIG.materials[code];
+
+            if (!material || !material.modelFile) {
+                alert("The selected model file is unavailable.");
+                return;
+            }
+
+            modelFrame.src = material.modelFile;
+            designPicker.value = code;
+        }
+
+        designPicker.addEventListener("change", () => {
+            loadModel(designPicker.value);
+        });
+
+        // Load the first presentation
+        if (order.length > 0) {
+            loadModel(order[0]);
+        }
+
+        // Desktop panel collapse
+        collapseButton.addEventListener("click", () => {
+            workspace.classList.toggle("collapsed");
+
+            collapseButton.textContent =
+                workspace.classList.contains("collapsed") ? ">" : "<";
+        });
+
+        // Mobile drawer
+        drawerButton.addEventListener("click", () => {
+            panel.classList.add("open");
+            drawerButton.classList.add("hidden");
+        });
+
+        // Close mobile drawer by tapping outside the panel
+        document.addEventListener("click", (event) => {
+            if (
+                window.innerWidth <= 760 &&
+                panel.classList.contains("open") &&
+                !panel.contains(event.target) &&
+                event.target !== drawerButton
+            ) {
+                panel.classList.remove("open");
+                drawerButton.classList.remove("hidden");
+            }
+        });
+
+        // Desktop divider resizing
+        let resizing = false;
+
+        divider.addEventListener("pointerdown", (event) => {
+            if (window.innerWidth <= 760) return;
+
+            resizing = true;
+            divider.setPointerCapture(event.pointerId);
+        });
+
+        divider.addEventListener("pointermove", (event) => {
+            if (!resizing) return;
+
+            const width = event.clientX;
+            const percentage = (width / window.innerWidth) * 100;
+
+            if (percentage >= 20 && percentage <= 65) {
+                panel.style.width = percentage + "%";
+            }
+        });
+
+        divider.addEventListener("pointerup", () => {
+            resizing = false;
+        });
+
+        divider.addEventListener("pointercancel", () => {
+            resizing = false;
+        });
+    </script>
+
+</body>
+</html>
