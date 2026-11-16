@@ -194,25 +194,12 @@
 
     <main class="workspace" id="workspace">
 
-        <section class="evaluation-panel" id="evaluationPanel">
-            <h2>F1 Evaluation</h2>
-
-            <p>
-                This panel will contain the evaluation
-                questionnaire for the displayed design.
-            </p>
-
-            <p>
-                Your answers will remain available when
-                you switch between the panel and model.
-            </p>
-
-            <hr>
-
-            <p><strong>Current development stage:</strong></p>
-            <p>Interface setup and model display testing.</p>
-
-        </section>
+<section class="evaluation-panel" id="evaluationPanel">
+    <div id="questionnaire">
+        <h2>F1 Evaluation</h2>
+        <p>Loading questionnaire...</p>
+    </div>
+</section>
 
         <div class="divider" id="divider">
             <button id="collapseButton" aria-label="Collapse evaluation panel">
@@ -237,6 +224,7 @@
     </button>
 
     <script src="config.js"></script>
+    <script src="evaluation.js"></script>
 
     <script>
         const workspace = document.getElementById("workspace");
@@ -269,7 +257,11 @@
             }
 
             modelFrame.src = material.modelFile;
-            designPicker.value = code;
+designPicker.value = code;
+
+// Display the corresponding F1 questionnaire
+const position = order.indexOf(code) + 1;
+renderF1Questionnaire(code, position);
         }
 
         designPicker.addEventListener("change", () => {
