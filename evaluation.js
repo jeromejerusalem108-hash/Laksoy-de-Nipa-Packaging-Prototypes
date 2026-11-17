@@ -578,15 +578,28 @@ function showF1ResponseReview() {
 const reviewResponsesButton =
     document.getElementById("reviewResponsesButton");
 
+
 if (reviewResponsesButton) {
     reviewResponsesButton.addEventListener("click", () => {
-        const reviewPanel = showF1ResponseReview();
+        const reviewPanel =
+            document.getElementById("responseReviewPanel");
 
-        if (reviewPanel) {
+        if (reviewPanel && !reviewPanel.hidden) {
+            reviewPanel.hidden = true;
+
+            reviewResponsesButton.textContent =
+                "Review Responses";
+
+            return;
+        }
+
+        const newReviewPanel = showF1ResponseReview();
+
+        if (newReviewPanel) {
             reviewResponsesButton.textContent =
                 "Hide Response Review";
 
-            reviewPanel.scrollIntoView({
+            newReviewPanel.scrollIntoView({
                 behavior: "smooth",
                 block: "start"
             });
