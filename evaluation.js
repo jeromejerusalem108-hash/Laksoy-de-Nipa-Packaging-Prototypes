@@ -20,25 +20,33 @@ const F1_SCALE = [
     { value: "3", label: "3 - Neither agree nor disagree" },
     { value: "4", label: "4 - Agree" },
     { value: "5", label: "5 - Strongly agree" },
-    { value: "CJ", label: "CJ - Cannot judge or not assessable" }
+    { value: "CJ", label: "CJ - Cannot judge" }
 ];
 
-// Unique storage key for the PROJECT L.A.K.A.S. F1 draft.
-const F1_STORAGE_KEY = "project_lakas_f1_draft_v1";
+// Draft storage is limited to the current browser tab session.
+const F1_STORAGE_KEY =
+    "project_lakas_f1_session_draft_v2";
 
-// Creates an empty response record.
+// Remove the old persistent draft, which could contain
+// respondent codes or other information from earlier tests.
+try {
+    localStorage.removeItem("project_lakas_f1_draft_v1");
+} catch (error) {
+    // Continue if browser storage is unavailable.
+}
+
+// Create an empty draft.
 function createEmptyF1Draft() {
     return {
-        respondentCode: "",
-        evaluationDate: "",
         designs: {}
     };
 }
 
-// Retrieves previously saved responses from this browser.
+// Load the current session's draft.
 function loadF1Draft() {
     try {
-        const saved = localStorage.getItem(F1_STORAGE_KEY);
+        const saved =
+            sessionStorage.getItem(F1_STORAGE_KEY);
 
         if (!saved) {
             return createEmptyF1Draft();
@@ -47,16 +55,6 @@ function loadF1Draft() {
         const parsed = JSON.parse(saved);
 
         return {
-            respondentCode:
-                typeof parsed.respondentCode === "string"
-                    ? parsed.respondentCode
-                    : "",
-
-            evaluationDate:
-                typeof parsed.evaluationDate === "string"
-                    ? parsed.evaluationDate
-                    : "",
-
             designs:
                 parsed.designs &&
                 typeof parsed.designs === "object" &&
@@ -70,13 +68,13 @@ function loadF1Draft() {
     }
 }
 
-// Keeps a working copy of the responses while the page is open.
+// Working copy of the responses.
 let f1Draft = loadF1Draft();
 
-// Saves the working copy to browser storage.
+// Save the current draft to session storage.
 function saveF1DraftToStorage() {
     try {
-        localStorage.setItem(
+        sessionStorage.setItem(
             F1_STORAGE_KEY,
             JSON.stringify(f1Draft)
         );
@@ -88,32 +86,48 @@ function saveF1DraftToStorage() {
     }
 }
 
-// Saves the currently displayed questionnaire.
+// Update the progress indicator.
+function updateF1Progress(root) {
+    if (!root) return;
+
+    const answered = F1_ITEMS.filter((item, index) => {
+        const itemNumber =
+            String(index + 1).padStart(2, "0");
+
+        return root.querySelector(
+            `input[name="item_${itemNumber}"]:checked`
+        );
+    }).length;
+
+    const progressFill =
+        root.querySelector("#progressFill");
+
+    const progressText =
+        root.querySelector("#progressText");
+
+    if (progressFill) {
+        progressFill.style.width =
+            (answered / F1_ITEMS.length * 100) + "%";
+    }
+
+    if (progressText) {
+        progressText.textContent =
+            `${answered} of ${F1_ITEMS.length} answered`;
+    }
+}
+
+// Save the currently displayed design.
 function saveCurrentF1Answers(sketchCode, position) {
-    const root = document.getElementById("questionnaire");
+    const root =
+        document.getElementById("questionnaire");
 
     if (!root) return;
 
-    const respondentCodeField =
-        root.querySelector("#respondentCode");
-
-    const evaluationDateField =
-        root.querySelector("#evaluationDate");
-
-    // Respondent information is shared across all five designs.
-    f1Draft.respondentCode = respondentCodeField
-        ? respondentCodeField.value
-        : "";
-
-    f1Draft.evaluationDate = evaluationDateField
-        ? evaluationDateField.value
-        : "";
-
-    // Each design receives its own separate set of answers.
     const designAnswers = {};
 
     F1_ITEMS.forEach((item, index) => {
-        const itemNumber = String(index + 1).padStart(2, "0");
+        const itemNumber =
+            String(index + 1).padStart(2, "0");
 
         const selectedAnswer = root.querySelector(
             `input[name="item_${itemNumber}"]:checked`
@@ -135,131 +149,195 @@ function saveCurrentF1Answers(sketchCode, position) {
 
     const saved = saveF1DraftToStorage();
 
-    const saveStatus = root.querySelector("#saveStatus");
+    const saveStatus =
+        root.querySelector("#saveStatus");
 
     if (saveStatus) {
         saveStatus.textContent = saved
-            ? "Draft saved automatically on this device."
-            : "This browser could not save permanently. Answers are only kept while this page remains open.";
+            ? "Draft saved for this browser tab session."
+            : "Unable to save this draft. Your current answers remain available while this page stays open.";
     }
+
+    updateF1Progress(root);
 }
 
-// Generates the questionnaire for the selected design.
+// Generate the questionnaire.
 function renderF1Questionnaire(sketchCode, position) {
-    const root = document.getElementById("questionnaire");
+    const root =
+        document.getElementById("questionnaire");
 
     if (!root) return;
 
-    const material = EVALUATION_CONFIG.materials[sketchCode];
+    const material =
+        EVALUATION_CONFIG.materials[sketchCode];
 
     if (!material) return;
 
-    // Retrieve previously saved answers for this particular design.
     const savedDesignAnswers =
         f1Draft.designs[sketchCode] || {};
 
     root.innerHTML = `
-        <h2>F1 - Sketch Evaluation</h2>
+        <div class="panel-heading">
+            <h2>F1 Packaging Design Evaluation</h2>
 
-        <p>
-            Evaluate the displayed design.
-            Select one answer for each statement.
-            You may skip an item or select CJ
-            when you cannot judge.
+            <p>
+                Examine the displayed packaging sketch and
+                provide your assessment using the rating
+                scale below.
+            </p>
+        </div>
+
+        <div class="design-summary">
+            <div class="design-name">
+                ${material.name}
+            </div>
+
+            <div class="design-position">
+                Design ${position} of 5 · ${sketchCode}
+            </div>
+        </div>
+
+        <div class="progress-section">
+            <div class="progress-label">
+                <span>Questionnaire progress</span>
+                <span id="progressText">0 of 12 answered</span>
+            </div>
+
+            <div
+                class="progress-track"
+                role="progressbar"
+                aria-label="Questionnaire completion"
+                aria-valuemin="0"
+                aria-valuemax="12"
+                aria-valuenow="0"
+                id="progressTrack"
+            >
+                <div
+                    class="progress-fill"
+                    id="progressFill"
+                ></div>
+            </div>
+        </div>
+
+        <h3 class="section-heading">
+            Evaluation Statements
+        </h3>
+
+        <p class="section-description">
+            Select one response for each statement.
+            You may leave an item unanswered or select
+            CJ when you cannot judge.
         </p>
-
-        <p><strong>Design:</strong> ${material.name}</p>
-        <p><strong>Sketch code:</strong> ${sketchCode}</p>
-        <p><strong>Presentation position:</strong> ${position}</p>
-
-        <hr>
-
-        <label for="respondentCode">Respondent code</label>
-        <input
-            id="respondentCode"
-            name="respondentCode"
-            type="text"
-            placeholder="Enter your assigned code"
-        >
-
-        <label for="evaluationDate">Date</label>
-        <input
-            id="evaluationDate"
-            name="evaluationDate"
-            type="date"
-        >
-
-        <hr>
 
         <div id="f1Questions"></div>
 
-        <h3>Comments</h3>
+        <h3 class="section-heading">
+            Written Feedback
+        </h3>
 
-        <label for="worksWell">What works well?</label>
-        <textarea
-            id="worksWell"
-            name="worksWell"
-            rows="3"
-        ></textarea>
+        <p class="section-description">
+            Share your observations and suggestions
+            about the displayed design.
+        </p>
 
-        <label for="improvements">What should be improved?</label>
-        <textarea
-            id="improvements"
-            name="improvements"
-            rows="3"
-        ></textarea>
+        <div class="comment-card">
+            <label for="worksWell">
+                What Works Well?
+            </label>
 
-        <hr>
+            <textarea
+                id="worksWell"
+                name="worksWell"
+                placeholder="Describe the strengths or features you appreciate in this design."
+            ></textarea>
+        </div>
 
-        <p
+        <div class="comment-card">
+            <label for="improvements">
+                Suggested Improvements
+            </label>
+
+            <textarea
+                id="improvements"
+                name="improvements"
+                placeholder="Describe any changes or improvements you would recommend."
+            ></textarea>
+        </div>
+
+        <div
+            class="save-status"
             id="saveStatus"
             role="status"
             aria-live="polite"
         >
-            Your answers are saved automatically on this device.
-        </p>
+            Your answers will be saved during this browser tab session.
+        </div>
     `;
 
-    const questions = document.getElementById("f1Questions");
+    const questions =
+        root.querySelector("#f1Questions");
 
-    // Generate all 12 questions.
+    // Generate the 12 evaluation statements.
     F1_ITEMS.forEach((item, index) => {
-        const itemNumber = String(index + 1).padStart(2, "0");
+        const itemNumber =
+            String(index + 1).padStart(2, "0");
 
-        const section = document.createElement("fieldset");
+        const section =
+            document.createElement("fieldset");
 
-        section.innerHTML = `
-            <legend>
-                ${itemNumber}. ${item}
-            </legend>
+        section.className = "question-card";
 
-            <div class="answer-options">
-                ${F1_SCALE.map(option => `
-                    <label>
-                        <input
-                            type="radio"
-                            name="item_${itemNumber}"
-                            value="${option.value}"
-                        >
-                        ${option.label}
-                    </label>
-                `).join("")}
-            </div>
-        `;
+        const legend =
+            document.createElement("legend");
 
+        const number =
+            document.createElement("span");
+
+        number.className = "question-number";
+        number.textContent = itemNumber + ".";
+
+        legend.appendChild(number);
+        legend.appendChild(
+            document.createTextNode(" " + item)
+        );
+
+        section.appendChild(legend);
+
+        const options =
+            document.createElement("div");
+
+        options.className = "answer-options";
+
+        F1_SCALE.forEach(option => {
+            const label =
+                document.createElement("label");
+
+            const radio =
+                document.createElement("input");
+
+            radio.type = "radio";
+            radio.name = `item_${itemNumber}`;
+            radio.value = option.value;
+
+            const text =
+                document.createElement("span");
+
+            text.textContent = option.label;
+
+            label.appendChild(radio);
+            label.appendChild(text);
+
+            options.appendChild(label);
+        });
+
+        section.appendChild(options);
         questions.appendChild(section);
     });
 
-    // Restore respondent information.
-    root.querySelector("#respondentCode").value =
-        f1Draft.respondentCode;
-
-    root.querySelector("#evaluationDate").value =
-        f1Draft.evaluationDate;
-
-    // Restore the previously selected answers.
+    // Restore saved answers for this design.
     F1_ITEMS.forEach((item, index) => {
-        const itemNumber = String(index + 1).padStart(2, "0");
+        const itemNumber =
+            String(index + 1).padStart(2, "0");
 
         const savedValue =
             savedDesignAnswers[`item_${itemNumber}`];
@@ -284,15 +362,19 @@ function renderF1Questionnaire(sketchCode, position) {
     root.querySelector("#improvements").value =
         savedDesignAnswers.improvements || "";
 
-    // Show whether this design already had saved answers.
-    const saveStatus = root.querySelector("#saveStatus");
+    // Restore the progress indicator.
+    updateF1Progress(root);
+
+    // Display the current save state.
+    const saveStatus =
+        root.querySelector("#saveStatus");
 
     if (Object.keys(savedDesignAnswers).length > 0) {
         saveStatus.textContent =
-            "Previously saved answers restored from this browser.";
+            "Previously saved answers restored for this browser tab session.";
     }
 
-    // Automatically save whenever a respondent makes a change.
+    // Save whenever a participant changes an answer.
     root.oninput = function () {
         saveCurrentF1Answers(sketchCode, position);
     };
