@@ -7,6 +7,36 @@
 
     <title>PROJECT L.A.K.A.S. | Evaluation</title>
 
+    <!-- Consent access protection -->
+    <script>
+        (function () {
+            const CONSENT_KEY = "project_lakas_f1_consent_v1";
+
+            let hasConsent = false;
+
+            try {
+                const saved = sessionStorage.getItem(CONSENT_KEY);
+                const consentData = saved ? JSON.parse(saved) : null;
+
+                hasConsent = !!(
+                    consentData &&
+                    consentData.consent === "agree"
+                );
+
+            } catch (error) {
+                hasConsent = false;
+            }
+
+            if (!hasConsent) {
+                document.documentElement.style.display = "none";
+
+                window.location.replace(
+                    "https://jeromejerusalem108-hash.github.io/Laksoy-Adviser-Preview/consent-draft.html"
+                );
+            }
+        })();
+    </script>
+
     <style>
         * {
             box-sizing: border-box;
@@ -17,54 +47,262 @@
             font-family: Arial, sans-serif;
             overflow: hidden;
             background: #f5f3ed;
+            color: #263b2d;
         }
 
         /* Main header */
+
         .topbar {
-            height: 54px;
+            height: 58px;
             display: flex;
             align-items: center;
             justify-content: space-between;
-            padding: 0 16px;
+            gap: 15px;
+            padding: 0 20px;
             background: #183b2b;
             color: white;
         }
 
         .topbar strong {
             font-size: 15px;
+            letter-spacing: 0.5px;
         }
 
         .topbar select {
-            padding: 7px;
+            max-width: 240px;
+            padding: 8px 10px;
+            border: 1px solid #d5dfd5;
             border-radius: 5px;
-            max-width: 190px;
+            background: white;
+            color: #263b2d;
+            font-size: 13px;
         }
 
         /* Main workspace */
+
         .workspace {
             display: flex;
-            height: calc(100vh - 54px);
+            height: calc(100vh - 58px);
             position: relative;
         }
 
         /* Evaluation panel */
+
         .evaluation-panel {
-            width: 36%;
-            min-width: 300px;
+            width: 42%;
+            min-width: 340px;
             max-width: 65%;
-            padding: 22px;
-            background: white;
+            padding: 24px;
+            background: #f8f8f5;
             overflow-y: auto;
+            scrollbar-width: thin;
         }
 
-        .evaluation-panel h2 {
-            margin-top: 0;
+        .panel-heading {
+            margin-bottom: 22px;
+        }
+
+        .panel-heading h2 {
+            margin: 0 0 7px;
             color: #183b2b;
+            font-family: Georgia, serif;
+            font-size: 25px;
+        }
+
+        .panel-heading p {
+            margin: 0;
+            color: #66746a;
+            font-size: 13px;
+            line-height: 1.6;
+        }
+
+        /* Design information */
+
+        .design-summary {
+            background: white;
+            border: 1px solid #e1e5dc;
+            border-left: 4px solid #356347;
+            border-radius: 7px;
+            padding: 16px;
+            margin-bottom: 22px;
+        }
+
+        .design-summary .design-name {
+            color: #183b2b;
+            font-weight: bold;
+            font-size: 16px;
+            margin-bottom: 5px;
+        }
+
+        .design-summary .design-position {
+            color: #68766b;
+            font-size: 12px;
+        }
+
+        /* Progress */
+
+        .progress-section {
+            margin-bottom: 24px;
+        }
+
+        .progress-label {
+            display: flex;
+            justify-content: space-between;
+            gap: 10px;
+            margin-bottom: 8px;
+            color: #526257;
+            font-size: 12px;
+        }
+
+        .progress-track {
+            width: 100%;
+            height: 7px;
+            background: #e4e9e1;
+            border-radius: 10px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            width: 0%;
+            background: #356347;
+            border-radius: 10px;
+            transition: width 0.2s ease;
+        }
+
+        /* Section headings */
+
+        .section-heading {
+            margin: 26px 0 13px;
+            color: #244b35;
+            font-family: Georgia, serif;
+            font-size: 19px;
+        }
+
+        .section-description {
+            margin: 0 0 15px;
+            color: #68766b;
+            font-size: 13px;
+            line-height: 1.6;
+        }
+
+        /* Individual questions */
+
+        .question-card {
+            margin: 0 0 15px;
+            padding: 17px;
+            background: white;
+            border: 1px solid #e2e6df;
+            border-radius: 7px;
+        }
+
+        .question-card legend {
+            display: block;
+            width: 100%;
+            padding: 0;
+            margin-bottom: 14px;
+            color: #263b2d;
+            font-size: 14px;
+            font-weight: bold;
+            line-height: 1.6;
+        }
+
+        .question-number {
+            display: inline-block;
+            margin-right: 5px;
+            color: #356347;
+        }
+
+        /* Rating choices */
+
+        .answer-options {
+            display: grid;
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+            gap: 8px;
+        }
+
+        .answer-options label {
+            display: flex;
+            align-items: center;
+            gap: 7px;
+            min-height: 38px;
+            padding: 8px;
+            background: #f5f6f1;
+            border: 1px solid #e2e6df;
+            border-radius: 5px;
+            cursor: pointer;
+            color: #45564a;
+            font-size: 12px;
+            line-height: 1.35;
+        }
+
+        .answer-options label:has(input:checked) {
+            background: #e4eee5;
+            border-color: #356347;
+            color: #183b2b;
+            font-weight: bold;
+        }
+
+        .answer-options input {
+            margin: 0;
+            accent-color: #356347;
+            flex-shrink: 0;
+        }
+
+        /* Comments */
+
+        .comment-card {
+            margin-bottom: 15px;
+            padding: 17px;
+            background: white;
+            border: 1px solid #e2e6df;
+            border-radius: 7px;
+        }
+
+        .comment-card label {
+            display: block;
+            margin-bottom: 9px;
+            color: #263b2d;
+            font-size: 14px;
+            font-weight: bold;
+        }
+
+        .comment-card textarea {
+            width: 100%;
+            min-height: 105px;
+            resize: vertical;
+            padding: 11px;
+            border: 1px solid #d6ddd3;
+            border-radius: 5px;
+            background: #fafbf8;
+            color: #263b2d;
+            font-family: Arial, sans-serif;
+            font-size: 13px;
+            line-height: 1.5;
+        }
+
+        .comment-card textarea:focus {
+            outline: 2px solid #b8d0bd;
+            border-color: #356347;
+        }
+
+        /* Save information */
+
+        .save-status {
+            margin-top: 22px;
+            padding: 13px;
+            background: #e9efe8;
+            border-radius: 5px;
+            color: #315b3e;
+            font-size: 12px;
+            line-height: 1.5;
         }
 
         /* Resizable divider */
+
         .divider {
             width: 12px;
+            flex-shrink: 0;
             background: #e4e1d8;
             cursor: col-resize;
             display: flex;
@@ -85,6 +323,7 @@
         }
 
         /* 3D model viewer */
+
         .model-viewer {
             flex: 1;
             min-width: 0;
@@ -99,6 +338,7 @@
         }
 
         /* Collapsed desktop panel */
+
         .workspace.collapsed .evaluation-panel {
             display: none;
         }
@@ -107,7 +347,8 @@
             width: 34px;
         }
 
-        /* Mobile drawer button */
+        /* Mobile drawer */
+
         .drawer-toggle {
             display: none;
         }
@@ -115,38 +356,38 @@
         @media (max-width: 760px) {
 
             .topbar {
-                height: 50px;
-                padding: 0 10px;
+                height: 52px;
+                padding: 0 11px;
             }
 
             .topbar strong {
-                font-size: 13px;
+                font-size: 12px;
             }
 
             .topbar select {
-                max-width: 145px;
+                max-width: 155px;
+                font-size: 11px;
             }
 
             .workspace {
-                height: calc(100dvh - 50px);
+                height: calc(100dvh - 52px);
             }
 
-            /* Model fills mobile screen */
             .model-viewer {
                 width: 100%;
                 height: 100%;
             }
 
-            /* Right-side evaluation drawer */
             .evaluation-panel {
                 position: fixed;
-                top: 50px;
+                top: 52px;
                 right: 0;
                 bottom: 0;
-                width: 88%;
-                max-width: 420px;
+                width: 90%;
+                max-width: 440px;
                 min-width: 0;
                 z-index: 20;
+                padding: 20px;
                 transform: translateX(100%);
                 transition: transform 0.3s ease;
                 box-shadow: -5px 0 18px rgba(0,0,0,0.2);
@@ -180,6 +421,16 @@
                 display: none;
             }
         }
+
+        @media (max-width: 420px) {
+            .answer-options {
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+            }
+
+            .evaluation-panel {
+                padding: 16px;
+            }
+        }
     </style>
 </head>
 
@@ -194,15 +445,17 @@
 
     <main class="workspace" id="workspace">
 
-<section class="evaluation-panel" id="evaluationPanel">
-    <div id="questionnaire">
-        <h2>F1 Evaluation</h2>
-        <p>Loading questionnaire...</p>
-    </div>
-</section>
+        <section class="evaluation-panel" id="evaluationPanel">
+            <div id="questionnaire">
+                <h2>F1 Evaluation</h2>
+                <p>Loading questionnaire...</p>
+            </div>
+        </section>
 
         <div class="divider" id="divider">
-            <button id="collapseButton" aria-label="Collapse evaluation panel">
+            <button
+                id="collapseButton"
+                aria-label="Collapse evaluation panel">
                 &lt;
             </button>
         </div>
@@ -227,29 +480,46 @@
     <script src="evaluation.js"></script>
 
     <script>
-        const workspace = document.getElementById("workspace");
-        const panel = document.getElementById("evaluationPanel");
-        const divider = document.getElementById("divider");
-        const collapseButton = document.getElementById("collapseButton");
-        const drawerButton = document.getElementById("drawerButton");
-        const modelFrame = document.getElementById("modelFrame");
-        const designPicker = document.getElementById("designPicker");
+        const workspace =
+            document.getElementById("workspace");
 
-        // Load the presentation choices from config.js
+        const panel =
+            document.getElementById("evaluationPanel");
+
+        const divider =
+            document.getElementById("divider");
+
+        const collapseButton =
+            document.getElementById("collapseButton");
+
+        const drawerButton =
+            document.getElementById("drawerButton");
+
+        const modelFrame =
+            document.getElementById("modelFrame");
+
+        const designPicker =
+            document.getElementById("designPicker");
+
+        // Load presentation choices.
         const order = EVALUATION_CONFIG.sketchOrder;
 
         order.forEach(code => {
             const option = document.createElement("option");
+
             option.value = code;
+
             option.textContent =
-                code + " - " + EVALUATION_CONFIG.materials[code].name;
+                code + " - " +
+                EVALUATION_CONFIG.materials[code].name;
 
             designPicker.appendChild(option);
         });
 
-        // Load the selected 3D model
+        // Load selected 3D model and questionnaire.
         function loadModel(code) {
-            const material = EVALUATION_CONFIG.materials[code];
+            const material =
+                EVALUATION_CONFIG.materials[code];
 
             if (!material || !material.modelFile) {
                 alert("The selected model file is unavailable.");
@@ -257,37 +527,40 @@
             }
 
             modelFrame.src = material.modelFile;
-designPicker.value = code;
 
-// Display the corresponding F1 questionnaire
-const position = order.indexOf(code) + 1;
-renderF1Questionnaire(code, position);
+            designPicker.value = code;
+
+            const position = order.indexOf(code) + 1;
+
+            renderF1Questionnaire(code, position);
         }
 
         designPicker.addEventListener("change", () => {
             loadModel(designPicker.value);
         });
 
-        // Load the first presentation
+        // Load first presentation.
         if (order.length > 0) {
             loadModel(order[0]);
         }
 
-        // Desktop panel collapse
+        // Desktop panel collapse.
         collapseButton.addEventListener("click", () => {
             workspace.classList.toggle("collapsed");
 
             collapseButton.textContent =
-                workspace.classList.contains("collapsed") ? ">" : "<";
+                workspace.classList.contains("collapsed")
+                    ? ">"
+                    : "<";
         });
 
-        // Mobile drawer
+        // Mobile drawer.
         drawerButton.addEventListener("click", () => {
             panel.classList.add("open");
             drawerButton.classList.add("hidden");
         });
 
-        // Close mobile drawer by tapping outside the panel
+        // Close mobile drawer when tapping outside.
         document.addEventListener("click", (event) => {
             if (
                 window.innerWidth <= 760 &&
@@ -300,7 +573,7 @@ renderF1Questionnaire(code, position);
             }
         });
 
-        // Desktop divider resizing
+        // Desktop divider resizing.
         let resizing = false;
 
         divider.addEventListener("pointerdown", (event) => {
@@ -313,10 +586,10 @@ renderF1Questionnaire(code, position);
         divider.addEventListener("pointermove", (event) => {
             if (!resizing) return;
 
-            const width = event.clientX;
-            const percentage = (width / window.innerWidth) * 100;
+            const percentage =
+                (event.clientX / window.innerWidth) * 100;
 
-            if (percentage >= 20 && percentage <= 65) {
+            if (percentage >= 25 && percentage <= 65) {
                 panel.style.width = percentage + "%";
             }
         });
