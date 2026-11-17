@@ -99,12 +99,16 @@ function loadF1VisitedDesigns() {
 let f1VisitedDesigns = loadF1VisitedDesigns();
 
 // Update the final submission section.
+
 function updateF1SubmissionStatus() {
     const section =
         document.getElementById("submissionSection");
 
     const status =
         document.getElementById("completionStatus");
+
+    const reviewButton =
+        document.getElementById("reviewResponsesButton");
 
     const total =
         EVALUATION_CONFIG.sketchOrder.length;
@@ -120,11 +124,17 @@ function updateF1SubmissionStatus() {
         section.hidden = !allViewed;
     }
 
-    if (status && allViewed) {
-        status.textContent =
-            "All five design presentations have been viewed. You may now review your responses.";
+    if (status) {
+        status.textContent = allViewed
+            ? "All five design presentations have been viewed. You may now review your responses."
+            : `${visited} of ${total} design presentations viewed.`;
+    }
+
+    if (reviewButton) {
+        reviewButton.disabled = !allViewed;
     }
 }
+
 
 // Record a design as viewed.
 function markF1DesignVisited(sketchCode) {
@@ -461,4 +471,125 @@ markF1DesignVisited(sketchCode);
     root.onchange = function () {
         saveCurrentF1Answers(sketchCode, position);
     };
+}
+
+// Display a review of all five design responses.
+function showF1ResponseReview() {
+    const submissionSection =
+        document.getElementById("submissionSection");
+
+    if (!submissionSection) return null;
+
+    let reviewPanel =
+        document.getElementById("responseReviewPanel");
+
+    if (!reviewPanel) {
+        reviewPanel = document.createElement("div");
+        reviewPanel.id = "responseReviewPanel";
+        reviewPanel.className = "response-review-panel";
+
+        submissionSection.appendChild(reviewPanel);
+    }
+
+    // Clear the previous review.
+    reviewPanel.replaceChildren();
+
+    const heading = document.createElement("h3");
+    heading.textContent = "Response Review";
+    reviewPanel.appendChild(heading);
+
+    const description = document.createElement("p");
+    description.textContent =
+        "Please check your responses for each design before submitting.";
+    reviewPanel.appendChild(description);
+
+    // Sort designs according to their presentation positions.
+    const designs = EVALUATION_CONFIG.sketchOrder
+        .map(code => ({
+            code,
+            answers: f1Draft.designs[code] || {}
+        }))
+        .sort((a, b) =>
+            (a.answers.presentationPosition || 0) -
+            (b.answers.presentationPosition || 0)
+        );
+
+    designs.forEach(({ code, answers }) => {
+        const material =
+            EVALUATION_CONFIG.materials[code];
+
+        const designHeading =
+            document.createElement("h4");
+
+        designHeading.textContent =
+            `${answers.presentationPosition || "-"} of 5 - ${material.name} (${code})`;
+
+        reviewPanel.appendChild(designHeading);
+
+        const answerList =
+            document.createElement("ol");
+
+        F1_ITEMS.forEach((item, index) => {
+            const itemNumber =
+                String(index + 1).padStart(2, "0");
+
+            const value =
+                answers[`item_${itemNumber}`] || "";
+
+            const option =
+                F1_SCALE.find(entry => entry.value === value);
+
+            const listItem =
+                document.createElement("li");
+
+            listItem.textContent =
+                `${item} — ${option ? option.label : "Not answered"}`;
+
+            answerList.appendChild(listItem);
+        });
+
+        reviewPanel.appendChild(answerList);
+
+        const worksWell =
+            document.createElement("p");
+
+        worksWell.textContent =
+            "What Works Well? " +
+            (answers.worksWell || "No comment provided.");
+
+        reviewPanel.appendChild(worksWell);
+
+        const improvements =
+            document.createElement("p");
+
+        improvements.textContent =
+            "Suggested Improvements: " +
+            (answers.improvements || "No comment provided.");
+
+        reviewPanel.appendChild(improvements);
+    });
+
+    reviewPanel.hidden = false;
+
+    return reviewPanel;
+}
+
+// Connect the Review Responses button.
+const reviewResponsesButton =
+    document.getElementById("reviewResponsesButton");
+
+if (reviewResponsesButton) {
+    reviewResponsesButton.addEventListener("click", () => {
+        const reviewPanel = showF1ResponseReview();
+
+        if (reviewPanel) {
+            reviewResponsesButton.textContent =
+                "Hide Response Review";
+
+            reviewPanel.scrollIntoView({
+                behavior: "smooth",
+                block: "start"
+            });
+        }
+    });
 }
