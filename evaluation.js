@@ -71,6 +71,85 @@ function loadF1Draft() {
 // Working copy of the responses.
 let f1Draft = loadF1Draft();
 
+// Track which designs have been viewed during this session.
+const F1_VISITED_KEY =
+    "project_lakas_f1_visited_v1";
+
+// Load previously viewed designs.
+function loadF1VisitedDesigns() {
+    try {
+        const saved = JSON.parse(
+            sessionStorage.getItem(F1_VISITED_KEY) || "[]"
+        );
+
+        if (!Array.isArray(saved)) {
+            return [];
+        }
+
+        return saved.filter(code =>
+            EVALUATION_CONFIG.sketchOrder.includes(code)
+        );
+
+    } catch (error) {
+        return [];
+    }
+}
+
+// Working list of viewed designs.
+let f1VisitedDesigns = loadF1VisitedDesigns();
+
+// Update the final submission section.
+function updateF1SubmissionStatus() {
+    const section =
+        document.getElementById("submissionSection");
+
+    const status =
+        document.getElementById("completionStatus");
+
+    const total =
+        EVALUATION_CONFIG.sketchOrder.length;
+
+    const visited =
+        EVALUATION_CONFIG.sketchOrder.filter(
+            code => f1VisitedDesigns.includes(code)
+        ).length;
+
+    const allViewed = visited === total;
+
+    if (section) {
+        section.hidden = !allViewed;
+    }
+
+    if (status && allViewed) {
+        status.textContent =
+            "All five design presentations have been viewed. You may now review your responses.";
+    }
+}
+
+// Record a design as viewed.
+function markF1DesignVisited(sketchCode) {
+    if (
+        !EVALUATION_CONFIG.sketchOrder.includes(sketchCode)
+    ) {
+        return;
+    }
+
+    if (!f1VisitedDesigns.includes(sketchCode)) {
+        f1VisitedDesigns.push(sketchCode);
+
+        try {
+            sessionStorage.setItem(
+                F1_VISITED_KEY,
+                JSON.stringify(f1VisitedDesigns)
+            );
+        } catch (error) {
+            // Continue without session tracking if storage fails.
+        }
+    }
+
+    updateF1SubmissionStatus();
+}
+
 // Save the current draft to session storage.
 function saveF1DraftToStorage() {
     try {
@@ -172,7 +251,7 @@ function renderF1Questionnaire(sketchCode, position) {
         EVALUATION_CONFIG.materials[sketchCode];
 
     if (!material) return;
-
+markF1DesignVisited(sketchCode);
     const savedDesignAnswers =
         f1Draft.designs[sketchCode] || {};
 
