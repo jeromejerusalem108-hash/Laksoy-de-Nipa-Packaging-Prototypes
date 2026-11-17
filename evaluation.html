@@ -450,6 +450,52 @@
                 <h2>F1 Evaluation</h2>
                 <p>Loading questionnaire...</p>
             </div>
+
+            <!-- Final submission section -->
+            <section
+                class="submission-section"
+                id="submissionSection"
+                hidden
+            >
+                <h2>Review and Submit</h2>
+
+                <p>
+                    You have reached the final stage of the
+                    F1 evaluation. Review your responses
+                    before submitting.
+                </p>
+
+                <div
+                    id="completionStatus"
+                    role="status"
+                    aria-live="polite"
+                >
+                    Complete all five design presentations
+                    to unlock submission.
+                </div>
+
+                <button
+                    type="button"
+                    id="reviewResponsesButton"
+                    disabled
+                >
+                    Review Responses
+                </button>
+
+                <button
+                    type="button"
+                    id="submitEvaluationButton"
+                    disabled
+                >
+                    Submit Evaluation
+                </button>
+
+                <div
+                    id="submissionStatus"
+                    role="status"
+                    aria-live="polite"
+                ></div>
+            </section>
         </section>
 
         <div class="divider" id="divider">
